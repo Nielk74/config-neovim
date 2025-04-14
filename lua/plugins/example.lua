@@ -5,6 +5,8 @@
 -- * disable/enabled LazyVim plugins
 -- * override the configuration of LazyVim plugins
 return {
+{ "nvim-tree/nvim-web-devicons", opts = {} },
+
   -- add gruvbox
   { "ellisonleao/gruvbox.nvim" },
 
