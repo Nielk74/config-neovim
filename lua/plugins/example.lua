@@ -8,14 +8,37 @@ return {
   -- add gruvbox
   { "ellisonleao/gruvbox.nvim" },
 
-  -- Configure LazyVim to load gruvbox
+{
+  "catppuccin/nvim",
+  name = "catppuccin",
+  priority = 1000,
+  config = function()
+    require("catppuccin").setup({
+      flavour = "mocha", -- latte, frappe, macchiato, mocha
+      integrations = {
+        neotree = true,
+        telescope = true,
+        which_key = true,
+        native_lsp = {
+          enabled = true,
+        },
+        cmp = true,
+        treesitter = true,
+        lsp_trouble = true,
+      },
+    })
+  end,
+},
+  
+-- Configure LazyVim to load gruvbox
   {
-    "LazyVim/LazyVim",
+   "LazyVim/LazyVim",
     opts = {
-      colorscheme = "gruvbox",
+        colorscheme = "catppuccin",
+     -- colorscheme = "gruvbox",
     },
   },
-
+--  { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
   -- change trouble config
   {
     "folke/trouble.nvim",
