@@ -5,6 +5,9 @@
 -- * disable/enabled LazyVim plugins
 -- * override the configuration of LazyVim plugins
 return {
+
+  { "akinsho/bufferline.nvim", enabled = false },
+
 { "nvim-tree/nvim-web-devicons", opts = {} },
 
   -- add gruvbox
