@@ -19,6 +19,36 @@ vim.keymap.set("n", "<leader>th", function() OpenNewTerminal("horizontal") end, 
 vim.keymap.set("n", "<leader>tv", function() OpenNewTerminal("vertical") end, { desc = "Nouveau terminal vertical" })
 vim.keymap.set("n", "<leader>tf", function() OpenNewTerminal("float") end, { desc = "Nouveau terminal flottant" })
 
+vim.keymap.set('n', 'H', '^', { desc = "Go to first non-blank character" })
+vim.keymap.set('n', 'L', '$', { desc = "Go to last non-blank character" })
+
+--vim.keymap.set("n", "<leader>fh", function()
+--  require("telescope").extensions.harpoon.marks()
+--end, { desc = "Harpoon: Marks (Telescope)" })
+vim.keymap.set("n", "<leader>hr", function()
+  local harpoon = require("harpoon")
+  local list = harpoon:list()
+  local current_file = vim.fn.expand("%:p")
+  for i, item in ipairs(list.items) do
+    if item.value == current_file then
+      list:removeAt(i)
+      vim.notify("Removed current file from Harpoon")
+      break
+    end
+  end
+end, { desc = "Harpoon: Remove Current File" })
+
+--vim.keymap.set("n", "<leader>fp", function()
+--  require("telescope.builtin").find_files()
+--end, { desc = "Telescope: Find Files" })
+
+vim.keymap.set("n", "<leader>fp", function()
+  require("telescope.builtin").find_files(require("telescope.themes").get_dropdown({
+   -- previewer = false, -- disable preview for speed
+    cwd = vim.fn.expand("%:p:h"),
+  }))
+end, { desc = "Telescope: Find Files (Dropdown)" })
+
 
 
 
