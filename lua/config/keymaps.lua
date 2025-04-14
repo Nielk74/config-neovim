@@ -45,10 +45,15 @@ end, { desc = "Harpoon: Remove Current File" })
 vim.keymap.set("n", "<leader>fp", function()
   require("telescope.builtin").find_files(require("telescope.themes").get_dropdown({
    -- previewer = false, -- disable preview for speed
-    cwd = vim.fn.expand("%:p:h"),
+    cwd = require("lazyvim.util").root(),
   }))
 end, { desc = "Telescope: Find Files (Dropdown)" })
 
+-- Resize with arrow keys
+vim.keymap.set("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase height" })
+vim.keymap.set("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease height" })
+vim.keymap.set("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease width" })
+vim.keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase width" })
 
 
 
