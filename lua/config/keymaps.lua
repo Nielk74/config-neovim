@@ -15,16 +15,23 @@ function OpenNewTerminal(direction)
 end
 
 -- Mappings
-vim.keymap.set("n", "<leader>th", function() OpenNewTerminal("horizontal") end, { desc = "Nouveau terminal horizontal" })
-vim.keymap.set("n", "<leader>tv", function() OpenNewTerminal("vertical") end, { desc = "Nouveau terminal vertical" })
-vim.keymap.set("n", "<leader>tf", function() OpenNewTerminal("float") end, { desc = "Nouveau terminal flottant" })
+vim.keymap.set("n", "<leader>th", function()
+  OpenNewTerminal("horizontal")
+end, { desc = "Nouveau terminal horizontal" })
+vim.keymap.set("n", "<leader>tv", function()
+  OpenNewTerminal("vertical")
+end, { desc = "Nouveau terminal vertical" })
+vim.keymap.set("n", "<leader>tf", function()
+  OpenNewTerminal("float")
+end, { desc = "Nouveau terminal flottant" })
 
-vim.keymap.set('n', 'H', '^', { desc = "Go to first non-blank character" })
-vim.keymap.set('n', 'L', '$', { desc = "Go to last non-blank character" })
+vim.keymap.set("n", "H", "^", { desc = "Go to first non-blank character" })
+vim.keymap.set("n", "L", "$", { desc = "Go to last non-blank character" })
 
 --vim.keymap.set("n", "<leader>fh", function()
 --  require("telescope").extensions.harpoon.marks()
 --end, { desc = "Harpoon: Marks (Telescope)" })
+--[[
 vim.keymap.set("n", "<leader>hr", function()
   local harpoon = require("harpoon")
   local list = harpoon:list()
@@ -37,24 +44,31 @@ vim.keymap.set("n", "<leader>hr", function()
     end
   end
 end, { desc = "Harpoon: Remove Current File" })
-
+--]]
 --vim.keymap.set("n", "<leader>fp", function()
 --  require("telescope.builtin").find_files()
 --end, { desc = "Telescope: Find Files" })
 
 vim.keymap.set("n", "<leader>fp", function()
   require("telescope.builtin").find_files(require("telescope.themes").get_dropdown({
-   -- previewer = false, -- disable preview for speed
+    -- previewer = false, -- disable preview for speed
     cwd = require("lazyvim.util").root(),
   }))
 end, { desc = "Telescope: Find Files (Dropdown)" })
+
+vim.keymap.set("n", "<leader>de", function()
+  vim.diagnostic.open_float(nil, {
+    focus = true,
+    scope = "line",
+    border = "rounded",
+    max_width = 80,
+  })
+end, { desc = "LSP: Show full diagnostic message" })
 
 -- Resize with arrow keys
 vim.keymap.set("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase height" })
 vim.keymap.set("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease height" })
 vim.keymap.set("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease width" })
 vim.keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase width" })
-
-
 
 vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { desc = "Sortir du mode terminal" })
