@@ -8,11 +8,11 @@ return {
 
   { "akinsho/bufferline.nvim", enabled = false },
 
-{ "nvim-tree/nvim-web-devicons", opts = {} },
+  { "nvim-tree/nvim-web-devicons", opts = {} },
 
   -- add gruvbox
   { "ellisonleao/gruvbox.nvim" },
-
+  --[[
 {
   "catppuccin/nvim",
   name = "catppuccin",
@@ -34,16 +34,17 @@ return {
     })
   end,
 },
-  
--- Configure LazyVim to load gruvbox
+--]]
+  -- Configure LazyVim to load gruvbox
   {
-   "LazyVim/LazyVim",
+    "LazyVim/LazyVim",
     opts = {
-        colorscheme = "catppuccin",
-     -- colorscheme = "gruvbox",
+      colorscheme = "darkplus",
+      --  colorscheme = "catppuccin",
+      -- colorscheme = "gruvbox",
     },
   },
---  { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
+  --  { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
   -- change trouble config
   {
     "folke/trouble.nvim",
@@ -149,6 +150,7 @@ return {
         "javascript",
         "json",
         "lua",
+        "go",
         "markdown",
         "markdown_inline",
         "python",
@@ -159,6 +161,7 @@ return {
         "vim",
         "yaml",
       },
+      highlight = { enable = true },
     },
   },
 
@@ -201,7 +204,7 @@ return {
   },
 
   -- use mini.starter instead of alpha
---  { import = "lazyvim.plugins.extras.ui.mini-starter" },
+  --  { import = "lazyvim.plugins.extras.ui.mini-starter" },
 
   -- add jsonls and schemastore packages, and setup treesitter for json, json5 and jsonc
   { import = "lazyvim.plugins.extras.lang.json" },
