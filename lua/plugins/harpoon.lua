@@ -1,117 +1,118 @@
+-- Module-level counter for rotation (persist while the module is loaded)
+local next_slot = 1
+
 return {
   "ThePrimeagen/harpoon",
   branch = "harpoon2",
   dependencies = { "nvim-lua/plenary.nvim" },
-  -- All configuration goes into the 'opts' table.
-  -- Lazy.nvim automatically passes this to harpoon:setup()
   opts = {
     menu = {
-      -- Calculate width dynamically if needed, or set a fixed preferred width
-      -- Using a function here might be less reliable than setting it once
-      -- Let's try setting a large fixed width or calculating on load in 'config' if necessary.
-      -- For simplicity, let's use a large fixed width or calculate later.
-      -- width = 100, -- Example fixed width
-      width = vim.api.nvim_win_get_width(0) - 4, -- Keep dynamic width calculation
+      width = vim.api.nvim_win_get_width(0) - 4,
     },
     settings = {
-      save_on_toggle = true, -- Save the list when adding/removing files
-      sync_on_ui_close = true, -- Persist changes when the UI closes
-      -- other harpoon settings...
+      save_on_toggle = true,
+      sync_on_ui_close = true,
     },
   },
-  -- Define all keybindings using the 'keys' table for consistency
   keys = function()
     local harpoon = require("harpoon")
-    local list = harpoon:list() -- Get the default list instance once
+    local list = harpoon:list()
 
-    return {
-      -- Keybinding to TOGGLE (add or remove) the current file
+    local keymaps = {
       {
-        "<leader>a", -- Changed from <leader>H for clarity (Add/Remove)
+        "<leader>a",
         function()
-          local current_file = vim.fn.expand("%:p")
-          local index_to_remove = nil
+          -- Get the absolute path to compare reliably
+          local current_file_abs = vim.fn.fnamemodify(vim.fn.expand("%:p"), ":p")
+          -- Create a relative path for storing in Harpoon
+          local current_file_rel = vim.fn.fnamemodify(current_file_abs, ":.")
 
-          -- Check if the file already exists in the list
+          -- Check if the file is already in the list (by comparing absolute paths)
+          local index_in_list = nil
           for i, item in ipairs(list.items) do
-            if item.value == current_file then
-              index_to_remove = i
+            local item_abs = vim.fn.fnamemodify(item.value, ":p")
+            if item_abs == current_file_abs then
+              index_in_list = i
               break
             end
           end
 
-          if index_to_remove then
-            -- File exists, remove it
-            list:remove_at(index_to_remove)
-            vim.notify("Harpoon: Fichier retiré: " .. vim.fn.fnamemodify(current_file, ":t"))
-          else
-            -- File does not exist, add it
+          if index_in_list then
+            list:remove_at(index_in_list)
+            vim.notify(
+              string.format(
+                "Harpoon: Removed '%s' from slot [%d]",
+                vim.fn.fnamemodify(current_file_abs, ":t"),
+                index_in_list
+              )
+            )
+            return
+          end
+
+          local slot
+          if #list.items < 5 then
+            -- Fewer than 5 items: add the new file
             list:add()
-            vim.notify("Harpoon: Fichier ajouté: " .. vim.fn.fnamemodify(vim.fn.expand("%:p"), ":t"))
+            slot = #list.items
+            -- Overwrite the just-added item’s path to be relative
+            list.items[slot].value = current_file_rel
+
+            -- Set the next_slot counter for future rotations
+            next_slot = slot + 1
+            if next_slot > 5 then
+              next_slot = 1
+            end
+
+            vim.notify(
+              string.format("Harpoon: Added '%s' at slot [%d]", vim.fn.fnamemodify(current_file_abs, ":t"), slot)
+            )
+          else
+            -- 5 or more items: rotate using the counter
+            slot = next_slot
+            list:replace_at(slot, { value = current_file_rel, context = {} })
+            vim.notify(
+              string.format("Harpoon: Rotated '%s' into slot [%d]", vim.fn.fnamemodify(current_file_abs, ":t"), slot)
+            )
+            next_slot = next_slot + 1
+            if next_slot > 5 then
+              next_slot = 1
+            end
           end
         end,
-        desc = "Harpoon: Toggle Current File", -- Updated description
+        desc = "Harpoon: Toggle current file with rotating 5-slot logic",
       },
-      -- Keybinding to toggle the Quick Menu UI
       {
         "<leader>h",
         function()
-          harpoon.ui:toggle_quick_menu(list) -- Use the list instance
+          harpoon.ui:toggle_quick_menu(list)
         end,
         desc = "Harpoon: Toggle Quick Menu",
       },
-      -- Keybinding to CLEAR the list
       {
         "<leader>hx",
         function()
-          if #list.items > 0 then -- Check if list is not already empty
+          if #list.items > 0 then
             list:clear()
-            vim.notify("Harpoon: Liste vidée")
+            vim.notify("Harpoon: List cleared")
           else
-            vim.notify("Harpoon: La liste est déjà vide")
+            vim.notify("Harpoon: List is already empty")
           end
-          -- No need to toggle the UI here unless you want to see it empty.
-          -- If you want to see it, uncomment the next line:
-          -- harpoon.ui:toggle_quick_menu(list)
         end,
         desc = "Harpoon: Clear List",
       },
-      -- Navigation Keybindings (AZERTY layout)
-      {
-        "<leader>&",
-        function()
-          list:select(1)
-        end,
-        desc = "Harpoon: Go to item 1",
-      },
-      {
-        "<leader>é",
-        function()
-          list:select(2)
-        end,
-        desc = "Harpoon: Go to item 2",
-      },
-      {
-        '<leader>"',
-        function()
-          list:select(3)
-        end,
-        desc = "Harpoon: Go to item 3",
-      },
-      {
-        "<leader>'",
-        function()
-          list:select(4)
-        end,
-        desc = "Harpoon: Go to item 4",
-      },
-      -- Add more navigation keys if needed (e.g., for 5, 6, etc.)
-      -- { "<leader>(", function() list:select(5) end, desc = "Harpoon: Go to item 5" },
-      -- Add bindings for next/prev item if desired
-      -- { "<C-e>", function() list:select_next() end, desc = "Harpoon: Next item" },
-      -- { "<C-y>", function() list:select_prev() end, desc = "Harpoon: Previous item" },
     }
+
+    -- Append jump mappings for items 1 through 8 in a flat manner
+    for i = 1, 5 do
+      table.insert(keymaps, {
+        "<leader>" .. i,
+        function()
+          list:select(i)
+        end,
+        desc = string.format("Harpoon: Go to item %d", i),
+      })
+    end
+
+    return keymaps
   end,
-  -- Removed the redundant config = function() ... end block
-  -- as all setup is handled by 'opts' and keys by 'keys'
 }
