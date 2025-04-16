@@ -65,6 +65,11 @@ vim.keymap.set("n", "<leader>de", function()
   })
 end, { desc = "LSP: Show full diagnostic message" })
 
+vim.keymap.set("n", "<leader>do", ":DiffviewOpen<CR>", { desc = "Open Diffview" })
+vim.keymap.set("n", "<leader>dc", ":DiffviewClose<CR>", { desc = "Close Diffview" })
+vim.keymap.set("n", "<leader>dh", ":DiffviewFileHistory<CR>", { desc = "File History (All)" })
+vim.keymap.set("n", "<leader>df", ":DiffviewFileHistory %<CR>", { desc = "File History (Current File)" })
+
 -- Resize with arrow keys
 vim.keymap.set("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase height" })
 vim.keymap.set("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease height" })
