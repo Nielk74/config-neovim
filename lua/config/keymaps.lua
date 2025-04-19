@@ -76,4 +76,21 @@ vim.keymap.set("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease height" })
 vim.keymap.set("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease width" })
 vim.keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase width" })
 
+vim.api.nvim_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", { noremap = true, silent = true })
+-- Rename variable in current file with prompt (no LSP)
+function RenameWord()
+  -- Get the word under cursor
+  local current_word = vim.fn.input("Rename word: ")
+
+  -- Prompt the user for a new name
+  local new_name = vim.fn.input("Rename '" .. current_word .. "' to: ")
+
+  -- Only run if something was entered
+  if new_name ~= "" and new_name ~= current_word then
+    -- Run the substitution command with confirmation
+    vim.cmd(":%s/\\<" .. current_word .. "\\>/" .. new_name .. "/gc")
+  end
+end
+vim.keymap.set("n", "<leader>rs", RenameWord, { noremap = true, silent = false })
+
 vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { desc = "Sortir du mode terminal" })
