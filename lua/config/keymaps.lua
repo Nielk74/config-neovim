@@ -86,7 +86,7 @@ function RenameWord()
   local new_name = vim.fn.input("Rename '" .. current_word .. "' to: ")
 
   -- Only run if something was entered
-  if new_name ~= "" and new_name ~= current_word then
+  if new_name ~= current_word then
     -- Run the substitution command with confirmation
     vim.cmd(":%s/\\<" .. current_word .. "\\>/" .. new_name .. "/gc")
   end
