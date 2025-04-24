@@ -53,28 +53,75 @@ local telescope_theme = require("telescope.themes")
 local get_root = require("lazyvim.util").root
 local grep_rg = { "--line-number", "--column", "--smart-case", "--max-count", "1" }
 
--- Live-grep over the whole project, but list *files* only
-vim.keymap.set("n", "<leader>fg", function()
-  telescope_builtin.live_grep({
-    cwd = get_root(),
-    additional_args = function()
-      return grep_rg
-    end,
-    previewer = false, -- optional: remove preview for a cleaner list
-  })
-end, { desc = "Live-grep (list files only)" })
+-- Telescope live‑grep that lists only one entry per file but keeps a preview
+-- Compatible with Neovim ≥0.10 (no deprecated vim.tbl_flatten)
 
--- Same idea, but seed the search string with the word under cursor
+local pickers = require("telescope.pickers")
+local finders = require("telescope.finders")
+local previewers = require("telescope.previewers")
+local conf = require("telescope.config").values
+local Path = require("plenary.path")
+local root = require("lazyvim.util").root
+
+-- base rg arguments: show line/column, smart‑case, stop after first hit per file
+local rg_base = { "rg", "--line-number", "--column", "--smart-case", "--max-count", "1" }
+
+-- helper: append one or more items to a list without vim.tbl_flatten
+local function append_args(list, ...)
+  local result = vim.deepcopy(list)
+  for _, v in ipairs({ ... }) do
+    table.insert(result, v)
+  end
+  return result
+end
+
+---Open a Telescope picker that shows files (one row) + preview first hit
+---@param prompt string search text
+local function rg_files_picker(prompt)
+  if not prompt or prompt == "" then
+    return
+  end
+
+  local cwd = root()
+  local cmd = append_args(rg_base, prompt) -- { "rg", ..., prompt }
+
+  pickers
+    .new({}, {
+      prompt_title = string.format("Files with %q", prompt),
+      finder = finders.new_oneshot_job(cmd, {
+        cwd = cwd,
+        -- transform each line (file:lnum:col:text) into a Telescope entry
+        entry_maker = function(line)
+          local file, lnum, col = line:match("^([^:]+):(%d+):(%d+):")
+          file = file or line -- fallback when parse fails
+          local abs = Path:new(cwd, file):absolute()
+          return {
+            value = line, -- full text, unused but kept for completeness
+            ordinal = file, -- for sorting/matching in picker
+            display = file, -- row text: just the relative path
+            filename = abs, -- absolute path for previewer
+            lnum = tonumber(lnum) or 1,
+            col = tonumber(col) or 1,
+          }
+        end,
+      }),
+      previewer = previewers.vim_buffer_vimgrep.new({}),
+      sorter = conf.generic_sorter({}),
+    })
+    :find()
+end
+
+-- key‑maps -----------------------------------------------------------
+-- Live‑grep prompt
+vim.keymap.set("n", "<leader>fg", function()
+  local query = vim.fn.input("Live grep for: ")
+  rg_files_picker(query)
+end, { desc = "Live‑grep (files list + preview)" })
+
+-- Grep word under cursor
 vim.keymap.set("n", "<leader>fw", function()
-  telescope_builtin.grep_string({
-    cwd = get_root(),
-    only_sort_text = true,
-    additional_args = function()
-      return grep_rg
-    end,
-    previewer = false,
-  })
-end, { desc = "Grep word under cursor (list files only)" })
+  rg_files_picker(vim.fn.expand("<cword>"))
+end, { desc = "Grep word under cursor (files list + preview)" })
 
 vim.keymap.set("n", "<leader>fp", function()
   telescope_builtin.find_files(telescope_theme.get_dropdown({
