@@ -48,11 +48,37 @@ end, { desc = "Harpoon: Remove Current File" })
 --vim.keymap.set("n", "<leader>fp", function()
 --  require("telescope.builtin").find_files()
 --end, { desc = "Telescope: Find Files" })
+local telescope_builtin = require("telescope.builtin")
+local telescope_theme = require("telescope.themes")
+local get_root = require("lazyvim.util").root
+local grep_rg = { "--line-number", "--column", "--smart-case", "--max-count", "1" }
+
+-- Live-grep over the whole project, but list *files* only
+vim.keymap.set("n", "<leader>fg", function()
+  telescope_builtin.live_grep({
+    cwd = get_root(),
+    additional_args = function()
+      return grep_rg
+    end,
+    previewer = false, -- optional: remove preview for a cleaner list
+  })
+end, { desc = "Live-grep (list files only)" })
+
+-- Same idea, but seed the search string with the word under cursor
+vim.keymap.set("n", "<leader>fw", function()
+  telescope_builtin.grep_string({
+    cwd = get_root(),
+    only_sort_text = true,
+    additional_args = function()
+      return grep_rg
+    end,
+    previewer = false,
+  })
+end, { desc = "Grep word under cursor (list files only)" })
 
 vim.keymap.set("n", "<leader>fp", function()
-  require("telescope.builtin").find_files(require("telescope.themes").get_dropdown({
-    -- previewer = false, -- disable preview for speed
-    cwd = require("lazyvim.util").root(),
+  telescope_builtin.find_files(telescope_theme.get_dropdown({
+    cwd = get_root(),
   }))
 end, { desc = "Telescope: Find Files (Dropdown)" })
 
